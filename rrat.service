@@ -1,0 +1,8 @@
+[Unit]
+Description=RRAT Demon
+
+[Service]
+ExecStart=%h/rratfiles/rrat-demon
+
+[Install]
+WantedBy=default.target
