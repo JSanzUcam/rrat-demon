@@ -39,6 +39,7 @@
 */
 
 // includes
+#include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
@@ -117,6 +118,7 @@ int main() {
                 case ENET_EVENT_TYPE_DISCONNECT:
                     // The attacker left
                     std::cout << "The Attacker left\n";
+                    event.peer->data = NULL;
                     break;
 
                 case ENET_EVENT_TYPE_NONE:
