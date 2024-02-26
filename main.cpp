@@ -212,7 +212,7 @@ void runCommand(uint8_t command) {
         case 3:
             // Broadcast before playing because it pauses the thread
             BroadcastPacket("Playing a vine boom on remote computer lmfao");
-            runLinuxCommand("ffplay -v 0 -nodisp -autoexit ~/Music/vineboom.mp3");
+            runLinuxCommand("nohup ffplay -v 0 -nodisp -autoexit ~/Music/vineboom.mp3 &");
             break;
 
         // Opens the presentation using the default browser
